@@ -19,15 +19,19 @@ body {
 }
 
 .app-container {
+  min-height: 100vh;
+}
+
+.app-container.login-bg-image {
   display: flex;
   justify-content: center;
   align-items: center;
-  min-height: 100vh;
 }
 
 .app-content {
   width: 100%;
   max-width: 420px;
+  margin: 0 auto;
 }
 
 .auth-card {
@@ -157,6 +161,86 @@ body {
   position: fixed;
   bottom: 20px;
   right: 20px;
-  width: 400px;
+  width: 450px;
   z-index: 1000;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+  border-radius: 20px;
+  overflow: hidden;
+}
+
+.fullscreen-chat {
+  width: 100% !important;
+  height: 100% !important;
+  border-radius: 0 !important;
+}
+
+@media (max-width: 768px) {
+  .chat-widget {
+    width: calc(100% - 40px);
+    left: 20px;
+    right: 20px;
+  }
+}
+
+/* Smooth scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+}
+
+/* Card hover effects */
+.card {
+  transition: all 0.3s ease;
+}
+
+/* Smooth animations */
+* {
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+/* Button focus states */
+.btn:focus,
+.form-control:focus,
+.form-select:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+}
+
+/* Loading spinner custom color */
+.spinner-border {
+  color: #667eea;
+}
+
+/* Badge styling */
+.badge {
+  font-weight: 600;
+  letter-spacing: 0.3px;
+}
+
+/* Modal backdrop */
+.modal-backdrop {
+  backdrop-filter: blur(4px);
+}
+
+/* Responsive typography */
+@media (max-width: 576px) {
+  h1 { font-size: 1.75rem; }
+  h2 { font-size: 1.5rem; }
+  h3 { font-size: 1.25rem; }
+  h4 { font-size: 1.1rem; }
+  h5 { font-size: 1rem; }
 }

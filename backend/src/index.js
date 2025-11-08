@@ -3,6 +3,7 @@ const express = require('express');
 const cookieParser = require('cookie-parser');
 const cors = require('cors');
 const sessionRoutes = require('./routes/session');
+const mlRoutes = require('./routes/ml');
 
 const app = express();
 const port = process.env.PORT || 4000;
@@ -20,6 +21,7 @@ app.use(express.json());
 app.use(cookieParser());
 
 app.use('/api', sessionRoutes);
+app.use('/api', mlRoutes);
 
 app.listen(port, () => {
   console.log(`✅ Server running on port ${port}`);

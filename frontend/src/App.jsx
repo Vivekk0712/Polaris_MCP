@@ -35,10 +35,14 @@ function App() {
   }
 
   return (
-    <div className={`app-container ${!user ? 'login-bg-image' : ''}`}> {/* Conditionally apply class */}
-      <div className="app-content">
-        {user ? <Dashboard user={user} /> : <LoginPage />}
-      </div>
+    <div className={`app-container ${!user ? 'login-bg-image' : ''}`}>
+      {user ? (
+        <Dashboard user={user} />
+      ) : (
+        <div className="app-content">
+          <LoginPage />
+        </div>
+      )}
     </div>
   );
 }

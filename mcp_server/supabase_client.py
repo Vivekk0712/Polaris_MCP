@@ -79,3 +79,12 @@ def clear_user_messages(user_id: str):
     response = supabase.table('messages').delete().eq('user_id', user_id).execute()
     print(f"DEBUG: Clear messages response: {response}")
     return response
+
+def get_supabase_client():
+    """
+    Returns the initialized Supabase client.
+    """
+    global supabase
+    if supabase is None:
+        raise Exception("Supabase client not initialized. Call init_supabase() first.")
+    return supabase

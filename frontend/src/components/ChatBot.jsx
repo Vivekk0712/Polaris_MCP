@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Form, Button, Card, Spinner, InputGroup } from 'react-bootstrap';
-import { X, Fullscreen, FullscreenExit, Trash } from 'react-bootstrap-icons';
+import { Form, Button, Card, Spinner, InputGroup, Badge } from 'react-bootstrap';
+import { X, Fullscreen, FullscreenExit, Trash, Send, ChatDots } from 'react-bootstrap-icons';
 import { getHistory, sendMessage, clearChat } from '../services/api';
+import { motion, AnimatePresence } from 'framer-motion';
 
-const ChatBot = ({ user, onToggleFullscreen, isFullscreen = false }) => {
+const ChatBot = ({ user, onToggleFullscreen, isFullscreen = false, onClose }) => {
   const [message, setMessage] = useState('');
   const [chatHistory, setChatHistory] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -99,146 +100,259 @@ const ChatBot = ({ user, onToggleFullscreen, isFullscreen = false }) => {
     }
   };
 
-  const chatContainerStyle = {
-    height: isFullscreen ? 'calc(100vh - 120px)' : '400px',
-    overflowY: 'auto',
-    overflowX: 'hidden',
-    padding: '15px',
-    backgroundColor: '#f8f9fa',
-    borderRadius: '8px',
-    marginBottom: '10px',
-    scrollBehavior: 'smooth'
-  };
-
-  const messageStyle = (role) => ({
-    margin: '10px 0',
-    padding: '12px 16px',
-    borderRadius: '18px',
-    maxWidth: '70%',
-    wordWrap: 'break-word',
-    ...(role === 'user' 
-      ? {
-          backgroundColor: '#007bff',
-          color: 'white',
-          marginLeft: 'auto',
-          textAlign: 'right'
-        }
-      : {
-          backgroundColor: 'white',
-          color: '#333',
-          marginRight: 'auto',
-          textAlign: 'left',
-          border: '1px solid #e9ecef'
-        })
-  });
-
   const formatTime = (timestamp) => {
     if (!timestamp) return '';
     const date = new Date(timestamp);
     return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   };
 
+  const messageVariants = {
+    hidden: { opacity: 0, y: 20, scale: 0.95 },
+    visible: { 
+      opacity: 1, 
+      y: 0, 
+      scale: 1,
+      transition: { duration: 0.3 }
+    }
+  };
+
   return (
-    <Card className={isFullscreen ? 'fullscreen-chat' : ''} style={isFullscreen ? {
-      position: 'fixed',
-      top: 0,
-      left: 0,
-      right: 0,
-      bottom: 0,
-      zIndex: 1000,
-      borderRadius: 0,
-      margin: 0
-    } : {}}>
-      <Card.Header className="d-flex justify-content-between align-items-center">
-        <h5 className="mb-0">Chat Assistant</h5>
-        <div className="d-flex gap-2">
-          {chatHistory.length > 0 && (
-            <Button 
-              variant="outline-danger" 
-              size="sm" 
-              onClick={handleClearChat}
-              disabled={loading}
-              title="Clear chat history"
-            >
-              <Trash size={16} />
-            </Button>
-          )}
-          <Button 
-            variant="link" 
-            size="sm" 
-            onClick={onToggleFullscreen}
-            style={{ padding: '4px' }}
-          >
-            {isFullscreen ? <FullscreenExit size={16} /> : <Fullscreen size={16} />}
-          </Button>
-          {isFullscreen && (
-            <Button 
-              variant="link" 
-              size="sm" 
-              onClick={onToggleFullscreen}
-              style={{ padding: '4px' }}
-            >
-              <X size={16} />
-            </Button>
-          )}
+    <Card 
+      className={`shadow-sm border-0 ${isFullscreen ? 'fullscreen-chat' : ''}`}
+      style={isFullscreen ? {
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        zIndex: 1000,
+        borderRadius: 0,
+        margin: 0
+      } : { 
+        background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+        borderRadius: '20px',
+        overflow: 'hidden'
+      }}
+    >
+      <Card.Header 
+        className="border-0 text-white" 
+        style={{ 
+          background: isFullscreen ? 'linear-gradient(135deg, #10b981 0%, #059669 100%)' : 'rgba(255,255,255,0.1)',
+          backdropFilter: 'blur(10px)'
+        }}
+      >
+        <div className="d-flex align-items-center justify-content-between">
+          <div className="d-flex align-items-center gap-2">
+            <ChatDots size={24} />
+            <div>
+              <h5 className="mb-0 fw-bold">💬 AI Assistant</h5>
+              <small style={{ opacity: 0.9 }}>Your personal chat companion</small>
+            </div>
+          </div>
+          <div className="d-flex gap-2">
+            {chatHistory.length > 0 && !isFullscreen && (
+              <Button 
+                variant="light"
+                size="sm" 
+                onClick={handleClearChat}
+                disabled={loading}
+                title="Clear chat history"
+                style={{ 
+                  borderRadius: '8px',
+                  padding: '6px 12px'
+                }}
+              >
+                <Trash size={14} />
+              </Button>
+            )}
+            {!isFullscreen && (
+              <>
+                <Button 
+                  variant="light"
+                  size="sm" 
+                  onClick={onToggleFullscreen}
+                  title="Fullscreen"
+                  style={{ 
+                    borderRadius: '8px',
+                    padding: '6px 12px'
+                  }}
+                >
+                  <Fullscreen size={14} />
+                </Button>
+                {onClose && (
+                  <Button 
+                    variant="light"
+                    size="sm" 
+                    onClick={onClose}
+                    title="Close chat"
+                    style={{ 
+                      borderRadius: '8px',
+                      padding: '6px 12px'
+                    }}
+                  >
+                    <X size={14} />
+                  </Button>
+                )}
+              </>
+            )}
+            {isFullscreen && (
+              <>
+                {chatHistory.length > 0 && (
+                  <Button 
+                    variant="light"
+                    size="sm" 
+                    onClick={handleClearChat}
+                    disabled={loading}
+                    title="Clear chat history"
+                    style={{ 
+                      borderRadius: '8px',
+                      padding: '6px 12px'
+                    }}
+                  >
+                    <Trash size={14} />
+                  </Button>
+                )}
+                <Button 
+                  variant="light"
+                  size="sm" 
+                  onClick={onToggleFullscreen}
+                  title="Exit fullscreen"
+                  style={{ 
+                    borderRadius: '8px',
+                    padding: '6px 12px'
+                  }}
+                >
+                  <FullscreenExit size={14} />
+                </Button>
+              </>
+            )}
+          </div>
         </div>
       </Card.Header>
-      <Card.Body style={{ padding: isFullscreen ? '20px' : '15px', position: 'relative' }}>
-        <div ref={chatContainerRef} style={chatContainerStyle}>
+      
+      <Card.Body style={{ padding: '0' }}>
+        <div 
+          ref={chatContainerRef}
+          style={{
+            height: isFullscreen ? 'calc(100vh - 200px)' : '450px',
+            overflowY: 'auto',
+            padding: '20px',
+            background: 'white',
+            scrollBehavior: 'smooth'
+          }}
+        >
           {chatHistory.length === 0 && (
-            <div style={{ 
-              textAlign: 'center', 
-              padding: '40px', 
-              color: '#666',
-              fontStyle: 'italic'
-            }}>
-              Start a conversation with the AI assistant!
-            </div>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+              style={{ textAlign: 'center', padding: '60px 20px' }}
+            >
+              <ChatDots size={48} style={{ color: '#10b981', marginBottom: '20px' }} />
+              <h6 className="mb-3" style={{ color: '#333' }}>Start a Conversation</h6>
+              <p style={{ color: '#666', fontSize: '0.9em' }}>
+                Ask me anything! I'm here to help you with your questions.
+              </p>
+            </motion.div>
           )}
           
-          {chatHistory.map((chat, index) => (
-            <div key={`${chat.timestamp || index}-${index}`} style={messageStyle(chat.role)}>
-              <div style={{ fontSize: '0.8em', opacity: 0.7, marginBottom: '4px' }}>
-                {chat.role === 'user' ? 'You' : 'Assistant'}
-                {chat.timestamp && (
-                  <span style={{ marginLeft: '8px' }}>
-                    {formatTime(chat.timestamp)}
-                  </span>
-                )}
-              </div>
-              <div>{chat.content}</div>
-            </div>
-          ))}
+          <AnimatePresence>
+            {chatHistory.map((chat, index) => (
+              <motion.div
+                key={`${chat.timestamp}-${index}`}
+                variants={messageVariants}
+                initial="hidden"
+                animate="visible"
+                style={{
+                  margin: '12px 0',
+                  display: 'flex',
+                  justifyContent: chat.role === 'user' ? 'flex-end' : 'flex-start'
+                }}
+              >
+                <div style={{
+                  maxWidth: '75%',
+                  padding: '14px 18px',
+                  borderRadius: chat.role === 'user' ? '18px 18px 4px 18px' : '18px 18px 18px 4px',
+                  background: chat.role === 'user' 
+                    ? 'linear-gradient(135deg, #10b981 0%, #059669 100%)'
+                    : '#f8f9fa',
+                  color: chat.role === 'user' ? 'white' : '#333',
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                  wordWrap: 'break-word'
+                }}>
+                  <div style={{ fontSize: '0.75em', opacity: 0.8, marginBottom: '6px' }}>
+                    {chat.role === 'user' ? '👤 You' : '🤖 Assistant'}
+                    {chat.timestamp && (
+                      <span style={{ marginLeft: '8px' }}>
+                        {formatTime(chat.timestamp)}
+                      </span>
+                    )}
+                  </div>
+                  <div style={{ fontSize: '0.95em', lineHeight: '1.5' }}>
+                    {chat.content}
+                  </div>
+                </div>
+              </motion.div>
+            ))}
+          </AnimatePresence>
           
           {loading && (
-            <div style={{ textAlign: 'center', padding: '20px' }}>
-              <Spinner animation="border" size="sm" />
-              <div style={{ marginTop: '8px', fontSize: '0.9em', color: '#666' }}>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              style={{ 
+                textAlign: 'center', 
+                padding: '20px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '10px'
+              }}
+            >
+              <Spinner animation="border" size="sm" style={{ color: '#10b981' }} />
+              <span style={{ color: '#666', fontSize: '0.9em' }}>
                 Assistant is thinking...
-              </div>
-            </div>
+              </span>
+            </motion.div>
           )}
         </div>
         
-        <Form onSubmit={handleSendMessage}>
-          <InputGroup>
-            <Form.Control
-              type="text"
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-              placeholder="Type your message..."
-              style={{ borderRadius: '20px 0 0 20px' }}
-              disabled={loading}
-            />
-            <Button 
-              type="submit" 
-              disabled={loading || !message.trim()} 
-              style={{ borderRadius: '0 20px 20px 0' }}
-            >
-              {loading ? 'Sending...' : 'Send'}
-            </Button>
-          </InputGroup>
-        </Form>
+        <div style={{ 
+          padding: '20px', 
+          background: 'white',
+          borderTop: '1px solid #e9ecef'
+        }}>
+          <Form onSubmit={handleSendMessage}>
+            <InputGroup>
+              <Form.Control
+                type="text"
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+                placeholder="Type your message..."
+                disabled={loading}
+                style={{
+                  borderRadius: '25px 0 0 25px',
+                  border: '2px solid #e9ecef',
+                  padding: '12px 20px',
+                  fontSize: '0.95em'
+                }}
+              />
+              <Button 
+                type="submit" 
+                disabled={loading || !message.trim()}
+                style={{
+                  borderRadius: '0 25px 25px 0',
+                  background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                  border: 'none',
+                  padding: '0 24px',
+                  fontWeight: '600'
+                }}
+              >
+                <Send size={18} />
+              </Button>
+            </InputGroup>
+          </Form>
+        </div>
       </Card.Body>
     </Card>
   );
